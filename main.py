@@ -18,15 +18,7 @@ import os
 
 st.set_page_config(page_title="AI Act Chatbot", layout="wide")
 st.title("🛡️ EU AI Act Chatbot")
-st.markdown("""
-> ⚠️ **Disclaimer**: This tool is for informational purposes only and does **not** constitute legal advice. For legal interpretation or decisions, consult a qualified legal professional.
 
-> 🔐 **Security Note**: This app uses a local FAISS vectorstore that is deserialized using Python's `pickle` module. Only trusted and self-generated vectorstores are supported.
-
-> 📊 **Privacy**: User inputs are processed temporarily and **not stored or shared**. No personal data is retained.
-""")
-
-st.markdown("![AI Meme](https://media.giphy.com/media/l4Jz3a8jO92crUlWM/giphy.gif)")
 
 load_dotenv()
 
@@ -92,3 +84,12 @@ with tab2:
 if st.button("🔄 Reset"):
     st.session_state.prompt_count = 0
     st.success("You can now ask 3 new questions.")
+st.markdown("""
+> ⚠️ **Disclaimer**: This tool is for informational purposes only and does **not** constitute legal advice. For legal interpretation or decisions, consult a qualified legal professional.
+
+> 🔐 **Security Note**: This app uses a local FAISS vectorstore that is deserialized using Python's `pickle` module. Only trusted and self-generated vectorstores are supported.
+
+> 📊 **Privacy**: User inputs are processed temporarily and **not stored or shared**. No personal data is retained.
+""")
+
+st.markdown("![AI Meme](https://media.giphy.com/media/l4Jz3a8jO92crUlWM/giphy.gif)")
