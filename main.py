@@ -76,23 +76,24 @@ with tab1:
 with tab2:
     st.subheader("Validate an AI System Description")
     system_description = st.text_area("🧠 Describe your AI system (Not legal advice):", key="system_input")
-
-    if st.button("Validate Compliance", key="submit_validation"):
+cols = st.columns([1, 1])
+with cols[0]:
+    if st.button("Submit Question", key="submit_question"):
         if st.session_state.usage_counter[user_token] >= 3:
             st.warning("❌ Prompt limit reached.")
-        elif not system_description.strip():
-            st.error("Please enter your system description.")
+        elif not user_question.strip():
+            st.error("Please enter a question.")
         else:
-            with st.spinner("Evaluating..."):
-                result = check_ai_act_compliance(system_description)
-                st.success("✅ Compliance Assessment:")
-                st.markdown(result)
+            with st.spinner("Thinking..."):
+                result = qa_chain.invoke(user_question)
+                st.success("✅ Answer:")
+                st.markdown(result["result"])
             st.session_state.usage_counter[user_token] += 1
 
-# 🔄 Reset usage
-if st.button("🔄 Reset Prompt Count"):
-    st.session_state.usage_counter[user_token] = 0
-    st.success("Prompt count reset. You can now ask 3 new questions.")
+with cols[1]:
+    if st.button("🔄 Reset Prompt Count"):
+        st.session_state.usage_counter[user_token] = 0
+        st.success("Prompt count reset. You can now ask 3 new questions.")
 
 # ⚖️ Disclaimer + GIF
 col1, col2 = st.columns([4, 1])
