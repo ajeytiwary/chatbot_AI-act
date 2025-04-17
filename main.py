@@ -76,7 +76,7 @@ with tab1:
 with tab2:
     st.subheader("Validate an AI System Description")
     system_description = st.text_area("🧠 Describe your AI system (Not legal advice):", key="system_input")
-cols = st.columns([1, 1])
+cols = st.columns([4, 1])
 with cols[0]:
     if st.button("Submit Question", key="submit_question"):
         if st.session_state.usage_counter[user_token] >= 3:
