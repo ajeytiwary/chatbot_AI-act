@@ -73,6 +73,14 @@ with tab1:
                 st.markdown(result["result"])
             st.session_state.usage_counter[user_token] += 1
 
+    # ✅ Right-aligned reset button
+    spacer, reset_col = st.columns([5, 1])
+    with reset_col:
+        if st.button("🔄 Reset Prompt Count", key="reset_prompt_tab1"):
+            st.session_state.usage_counter[user_token] = 0
+            st.success("Prompt count reset. You can now ask 3 new questions.")
+
+
 with tab2:
     st.subheader("Validate an AI System Description")
     system_description = st.text_area("🧠 Describe your AI system (Not legal advice):", key="system_input")
