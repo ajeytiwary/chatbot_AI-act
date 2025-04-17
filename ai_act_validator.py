@@ -35,9 +35,7 @@ Respond in this format:
 # Create the function to use Gemini to run this prompt
 def check_ai_act_compliance(system_description: str) -> str:
     llm = ChatGoogleGenerativeAI(
-        model="gemini-pro",
-        temperature=0.1
-    )
+        model="gemini-2.0-flash", temperature=0.1    )
 
     chain = LLMChain(
         llm=llm,
