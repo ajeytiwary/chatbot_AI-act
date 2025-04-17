@@ -1,56 +1,69 @@
 import torch
+import os
+import uuid
+import streamlit as st
+from dotenv import load_dotenv
+from langchain.chains import RetrievalQA
+from langchain_google_genai import ChatGoogleGenerativeAI
+from ai_act_validator import check_ai_act_compliance
+from utils import load_or_create_vectorstore, WeightedRetriever
+from streamlit_extras import cookie_manager
 
-# 🩹 Patch to avoid Streamlit crash with torch in some environments
+# 🩹 Torch patch for Streamlit compatibility
 if hasattr(torch, '__path__') and hasattr(torch.__path__, '_path'):
     try:
         del torch.__path__
     except Exception:
         pass
 
-import google.generativeai as genai
-import streamlit as st
-from dotenv import load_dotenv
-from ai_act_validator import check_ai_act_compliance
-from utils import load_documents, create_vectorstore, load_or_create_vectorstore, WeightedRetriever
-from langchain.chains import RetrievalQA
-from langchain_google_genai import ChatGoogleGenerativeAI
-import os
-
+# Streamlit setup
 st.set_page_config(page_title="AI Act Chatbot", layout="wide")
 st.title("🛡️ EU AI Act Chatbot")
-
-
 load_dotenv()
 
-# ✅ Prompt limit
-if "prompt_count" not in st.session_state:
-    st.session_state.prompt_count = 0
-remaining = 3 - st.session_state.prompt_count
-st.info(f"You have {remaining} prompts left.")
+# 🍪 Cookie-based user tracking
+cookies = cookie_manager.CookieManager()
+cookies.get_all()
 
-# ✅ Load vectorstore + QA chain
+if cookies.get("user_token") is None:
+    user_token = str(uuid.uuid4())
+    cookies.set("user_token", user_token)
+else:
+    user_token = cookies.get("user_token")
+
+if "usage_counter" not in st.session_state:
+    st.session_state.usage_counter = {}
+
+if user_token not in st.session_state.usage_counter:
+    st.session_state.usage_counter[user_token] = 0
+
+remaining = 3 - st.session_state.usage_counter[user_token]
+st.info(f"🔁 You have **{remaining}** prompts left in this session.")
+
+# 🔍 Load QA chain
 @st.cache_resource
 def setup_chain():
     vs = load_or_create_vectorstore()
-    source_weights = {
-        "AI_act_EU_full_text.pdf": 1.5,
-    }
-    retriever = WeightedRetriever(vectorstore=vs, source_weights=source_weights, k=10)
+    retriever = WeightedRetriever(
+        vectorstore=vs,
+        source_weights={"AI_act_EU_full_text.pdf": 1.5},
+        k=10
+    )
     llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.1)
     return RetrievalQA.from_chain_type(llm=llm, retriever=retriever, return_source_documents=True)
 
 qa_chain = setup_chain()
 
-# ✅ Two tabs: Ask and Validate
+# 🧭 Interface with two tabs
 tab1, tab2 = st.tabs(["📘 Ask a Question", "🔍 Validate AI System"])
 
 with tab1:
     st.subheader("Ask a question from the AI Act")
-    user_question = st.text_area("📝 Enter your question about AI act (Not a LEGAL advice):", key="question_input")
+    user_question = st.text_area("📝 Enter your question about the AI Act (Not legal advice):", key="question_input")
 
     if st.button("Submit Question", key="submit_question"):
-        if st.session_state.prompt_count >= 3:
-            st.warning("❌ Prompt limit reached for this session.")
+        if st.session_state.usage_counter[user_token] >= 3:
+            st.warning("❌ Prompt limit reached.")
         elif not user_question.strip():
             st.error("Please enter a question.")
         else:
@@ -58,19 +71,15 @@ with tab1:
                 result = qa_chain.invoke(user_question)
                 st.success("✅ Answer:")
                 st.markdown(result["result"])
-                if False:
-                    with st.expander("📚 Sources"):
-                        for doc in result["source_documents"]:
-                            st.markdown(f"- **{doc.metadata.get('source', 'Unknown')}** | Page: {doc.metadata.get('page', 'n/a')}")
-            st.session_state.prompt_count += 1
+            st.session_state.usage_counter[user_token] += 1
 
 with tab2:
     st.subheader("Validate an AI System Description")
-    system_description = st.text_area("🧠 Describe your AI system (Not a LEGAL advice):", key="system_input")
+    system_description = st.text_area("🧠 Describe your AI system (Not legal advice):", key="system_input")
 
     if st.button("Validate Compliance", key="submit_validation"):
-        if st.session_state.prompt_count >= 3:
-            st.warning("❌ Prompt limit reached for this session.")
+        if st.session_state.usage_counter[user_token] >= 3:
+            st.warning("❌ Prompt limit reached.")
         elif not system_description.strip():
             st.error("Please enter your system description.")
         else:
@@ -78,19 +87,21 @@ with tab2:
                 result = check_ai_act_compliance(system_description)
                 st.success("✅ Compliance Assessment:")
                 st.markdown(result)
-            st.session_state.prompt_count += 1
+            st.session_state.usage_counter[user_token] += 1
 
-# ✅ Reset prompt count
-if st.button("🔄 Reset"):
-    st.session_state.prompt_count = 0
-    st.success("You can now ask 3 new questions.")
+# 🔄 Reset usage
+if st.button("🔄 Reset Prompt Count"):
+    st.session_state.usage_counter[user_token] = 0
+    st.success("Prompt count reset. You can now ask 3 new questions.")
+
+# ⚖️ Disclaimer + GIF
 col1, col2 = st.columns([4, 1])
-
 with col1:
     st.markdown("""
     > ⚠️ **Disclaimer**: This tool is for informational purposes only and does **not** constitute legal advice.  
     > 🔐 **Security Note**: Only self-generated vectorstores are supported. Do not upload untrusted files.  
-    > 📊 **Privacy**: No personal data is stored. Inputs are processed temporarily in-session.
+    > 📊 **Privacy**: No personal data is stored. Inputs are processed temporarily in-session.  
+    > 🍪 **Tracking**: We use an anonymous cookie token to enforce prompt limits.
     """)
 
 with col2:

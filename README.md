@@ -16,6 +16,12 @@ An interactive chatbot built with Streamlit, LangChain, FAISS, and Gemini (Googl
 
 📊 Privacy Statement: User inputs are processed in-session and are not stored or shared. No personal data is retained.
 
+🚫 Rate Limiting: The chatbot limits users to 3 prompts per session using cookie-based UUID tracking to ensure fair usage and manage backend cost.
+
+💸 API Cost Monitoring: Gemini API calls are usage-based and metered. Keep API keys secure and monitor usage quotas to avoid unexpected charges.
+
+🍪 Cookie Tracking: Each user is assigned a pseudonymous ID stored via a browser cookie (UUID). This enables lightweight, privacy-respecting user tracking for prompt limit enforcement.
+
 🌐 Features
 
 🏰 AI Act QA Chat (RAG)
