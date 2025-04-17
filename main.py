@@ -7,7 +7,7 @@ from langchain.chains import RetrievalQA
 from langchain_google_genai import ChatGoogleGenerativeAI
 from ai_act_validator import check_ai_act_compliance
 from utils import load_or_create_vectorstore, WeightedRetriever
-from extra_streamlit_components import BetterCookieManager
+# from extra_streamlit_components import BetterCookieManager
 
 
 # 🩹 Torch patch for Streamlit compatibility
@@ -23,14 +23,14 @@ st.title("🛡️ EU AI Act Chatbot")
 load_dotenv()
 
 # 🍪 Cookie-based user tracking
-cookie_manager = BetterCookieManager()
-cookies = cookie_manager.get_all()
-if cookies.get("user_token") is None:
-    user_token = str(uuid.uuid4())
-    cookies.set("user_token", user_token)
-else:
-    user_token = cookies.get("user_token")
 
+# 🔐 UUID-based session token
+if "user_token" not in st.session_state:
+    st.session_state.user_token = str(uuid.uuid4())
+
+user_token = st.session_state.user_token
+
+# 🔄 Usage counter per session
 if "usage_counter" not in st.session_state:
     st.session_state.usage_counter = {}
 
