@@ -95,6 +95,6 @@ with col1:
 
 with col2:
     st.markdown(
-        '<img src="https://media.giphy.com/media/l4Jz3a8jO92crUlWM/giphy.gif" width="100%">',
+        '<img src="https://media.giphy.com/media/l4Jz3a8jO92crUlWM/giphy.gif" width="50%">',
         unsafe_allow_html=True
     )
