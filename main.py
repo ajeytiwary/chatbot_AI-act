@@ -84,12 +84,17 @@ with tab2:
 if st.button("🔄 Reset"):
     st.session_state.prompt_count = 0
     st.success("You can now ask 3 new questions.")
-st.markdown("""
-> ⚠️ **Disclaimer**: This tool is for informational purposes only and does **not** constitute legal advice. For legal interpretation or decisions, consult a qualified legal professional.
+col1, col2 = st.columns([4, 1])
 
-> 🔐 **Security Note**: This app uses a local FAISS vectorstore that is deserialized using Python's `pickle` module. Only trusted and self-generated vectorstores are supported.
+with col1:
+    st.markdown("""
+    > ⚠️ **Disclaimer**: This tool is for informational purposes only and does **not** constitute legal advice.  
+    > 🔐 **Security Note**: Only self-generated vectorstores are supported. Do not upload untrusted files.  
+    > 📊 **Privacy**: No personal data is stored. Inputs are processed temporarily in-session.
+    """)
 
-> 📊 **Privacy**: User inputs are processed temporarily and **not stored or shared**. No personal data is retained.
-""")
-
-st.markdown("![AI Meme](https://media.giphy.com/media/l4Jz3a8jO92crUlWM/giphy.gif)")
+with col2:
+    st.markdown(
+        '<img src="https://media.giphy.com/media/l4Jz3a8jO92crUlWM/giphy.gif" width="100%">',
+        unsafe_allow_html=True
+    )
